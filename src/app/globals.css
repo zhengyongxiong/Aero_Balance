@@ -1,13 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --ink-950: #06111f;
-  --ink-900: #0b1c31;
-  --sky-500: #38a7ff;
-  --cyan-400: #41e2e8;
-  --indigo-400: #818cf8;
-  --cloud-50: #f6fafd;
+  color-scheme: light;
+  --navy-950: #03132e;
+  --navy-900: #07285a;
+  --navy-800: #0a3878;
+  --blue-600: #087bff;
+  --blue-500: #1a9cff;
+  --cyan-400: #31d9ee;
+  --ink-950: #08234e;
+  --ink-700: #36577f;
+  --ink-500: #7188a4;
+  --cloud-50: #f6f9fd;
+  --line: #dce7f3;
+  --amber: #d98400;
+  --green: #0f9d73;
+  --red: #d83c4e;
 }
 
 * {
@@ -15,13 +23,558 @@
 }
 
 html {
-  background: var(--ink-950);
+  background: var(--cloud-50);
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--ink-950);
-  color: var(--cloud-50);
-  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--cloud-50);
+  color: var(--ink-950);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+    "Microsoft YaHei", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  padding-bottom: 78px;
+}
+
+.app-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  color: white;
+  background: rgb(3 19 46 / 54%);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  backdrop-filter: blur(20px);
+}
+
+.app-header__inner {
+  width: min(1180px, 100%);
+  min-height: 68px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand__mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 9%);
+}
+
+.brand strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.brand small {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgb(255 255 255 / 63%);
+  font-size: 11px;
+}
+
+.language-switch {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 999px;
+}
+
+.language-switch button {
+  min-width: 42px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(255 255 255 / 72%);
+  cursor: pointer;
+}
+
+.language-switch button[aria-pressed="true"] {
+  color: white;
+  background: var(--blue-500);
+}
+
+.language-switch span {
+  width: 1px;
+  height: 18px;
+  background: rgb(255 255 255 / 25%);
+}
+
+.bottom-nav {
+  position: fixed;
+  inset: auto 12px 10px;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 6px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 24px;
+  background: rgb(3 19 46 / 92%);
+  box-shadow: 0 18px 52px rgb(3 19 46 / 28%);
+  backdrop-filter: blur(20px);
+}
+
+.bottom-nav a {
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 18px;
+  color: rgb(255 255 255 / 52%);
+  font-size: 10px;
+}
+
+.bottom-nav a.is-active {
+  color: white;
+  background: rgb(255 255 255 / 10%);
+}
+
+.flight-hero {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+  color: white;
+  background: var(--navy-950);
+}
+
+.flight-hero__background {
+  object-fit: cover;
+  object-position: 68% center;
+}
+
+.flight-hero__veil {
+  position: absolute;
+  inset: 0;
+  background: rgb(2 21 52 / 28%);
+}
+
+.flight-hero__content {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 118px 20px 44px;
+}
+
+.flight-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: #9cd9ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.flight-hero h1 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(34px, 7vw, 64px);
+  line-height: 1.12;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.flight-hero__content > p:not(.flight-hero__eyebrow) {
+  max-width: 660px;
+  margin: 18px 0 0;
+  color: rgb(255 255 255 / 68%);
+  font-size: clamp(14px, 2.8vw, 19px);
+  line-height: 1.55;
+}
+
+.flight-telemetry {
+  max-width: 780px;
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  gap: 8px;
+  color: rgb(255 255 255 / 74%);
+}
+
+.flight-telemetry span {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.flight-telemetry span:nth-child(2) {
+  transform: translateY(16px);
+}
+
+.flight-telemetry span:nth-child(3) {
+  transform: translateY(34px);
+}
+
+.flight-telemetry span:nth-child(4) {
+  transform: translateY(50px);
+}
+
+.flight-telemetry small {
+  display: block;
+  margin-top: 3px;
+  color: #8fe8ff;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.flight-telemetry .is-current small {
+  color: #35efff;
+  font-size: 15px;
+}
+
+.home-instrument {
+  position: relative;
+  width: min(980px, 100%);
+  margin: -34px auto 0;
+  padding: 0 20px 42px;
+  background: var(--cloud-50);
+  border-radius: 48px 48px 0 0;
+}
+
+.instrument-panel {
+  padding-top: 22px;
+}
+
+.instrument-panel__label {
+  margin: 0;
+  text-align: center;
+  color: var(--blue-600);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.instrument-panel__label span {
+  margin-left: 6px;
+  color: var(--ink-500);
+  font-weight: 500;
+}
+
+.pressure-sphere {
+  position: relative;
+  width: min(88vw, 510px);
+  aspect-ratio: 1;
+  margin: -12px auto -22px;
+}
+
+.pressure-sphere > img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.pressure-sphere__value {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  transform: translateY(3%);
+}
+
+.pressure-sphere__value strong {
+  display: block;
+  color: #082f68;
+  font-size: clamp(64px, 18vw, 116px);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.075em;
+}
+
+.pressure-sphere__value span {
+  margin-top: 10px;
+  color: #133e76;
+  font-size: clamp(22px, 5vw, 32px);
+}
+
+.instrument-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.instrument-metric {
+  min-width: 0;
+  padding: 18px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.instrument-metric:nth-child(odd) {
+  border-right: 1px solid var(--line);
+}
+
+.instrument-metric:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.instrument-metric svg {
+  color: var(--blue-600);
+}
+
+.instrument-metric p {
+  margin: 8px 0 4px;
+  color: var(--ink-700);
+  font-size: 12px;
+}
+
+.instrument-metric strong {
+  display: block;
+  color: var(--blue-600);
+  font-size: 21px;
+  letter-spacing: -0.035em;
+}
+
+.instrument-metric.tone-amber svg,
+.instrument-metric.tone-amber strong {
+  color: var(--amber);
+}
+
+.instrument-metric.tone-green svg,
+.instrument-metric.tone-green strong {
+  color: var(--green);
+}
+
+.instrument-metric.tone-red svg,
+.instrument-metric.tone-red strong {
+  color: var(--red);
+}
+
+.home-actions {
+  margin-top: 26px;
+  display: grid;
+  gap: 10px;
+}
+
+.action-button {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px;
+  border-radius: 18px;
+  background: var(--blue-600);
+  color: white;
+  box-shadow: 0 18px 36px rgb(8 123 255 / 23%);
+  font-size: 17px;
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.action-button > span {
+  flex: 1;
+  text-align: center;
+}
+
+.action-button:active {
+  transform: scale(0.985);
+}
+
+.action-button--secondary {
+  min-height: 48px;
+  background: transparent;
+  color: var(--blue-600);
+  box-shadow: none;
+}
+
+.action-button--secondary > span {
+  flex: initial;
+}
+
+.value-chain {
+  margin: 22px 0 0;
+  padding: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.value-chain li {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.value-chain li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 25px;
+  left: calc(50% + 25px);
+  width: calc(100% - 50px);
+  border-top: 1px dashed #b9cce0;
+}
+
+.value-chain__number {
+  position: absolute;
+  top: -7px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #a9b5c3;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.value-chain li:first-child .value-chain__number {
+  background: var(--blue-600);
+}
+
+.value-chain__icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 5px;
+  border: 2px solid #ccd8e5;
+  border-radius: 50%;
+  color: #8999aa;
+  background: white;
+}
+
+.value-chain li:first-child .value-chain__icon {
+  color: var(--blue-600);
+  border-color: var(--blue-600);
+}
+
+.value-chain strong {
+  margin-top: 9px;
+  color: var(--ink-700);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.value-chain small {
+  margin-top: 2px;
+  color: #94a3b4;
+  font-size: 10px;
+}
+
+@media (min-width: 760px) {
+  .app-shell {
+    padding-bottom: 0;
+  }
+
+  .bottom-nav {
+    inset: 12px 20px auto auto;
+    grid-template-columns: repeat(4, auto);
+    padding: 4px;
+    background: rgb(3 19 46 / 38%);
+    box-shadow: none;
+  }
+
+  .bottom-nav a {
+    min-width: 76px;
+    min-height: 42px;
+    flex-direction: row;
+    gap: 7px;
+  }
+
+  .app-header__inner {
+    padding-right: 370px;
+  }
+
+  .flight-hero {
+    min-height: 640px;
+  }
+
+  .flight-hero__content {
+    padding: 138px 28px 64px;
+  }
+
+  .home-instrument {
+    margin-top: -86px;
+    padding: 28px 42px 60px;
+    border-radius: 60px 60px 0 0;
+    box-shadow: 0 -24px 60px rgb(3 19 46 / 12%);
+  }
+
+  .instrument-metrics {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .instrument-metric {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .instrument-metric:last-child {
+    border-right: 0;
+  }
+
+  .home-actions {
+    grid-template-columns: 1.4fr 0.8fr;
+  }
+
+  .value-chain strong {
+    font-size: 13px;
+  }
+
+  .value-chain small {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
