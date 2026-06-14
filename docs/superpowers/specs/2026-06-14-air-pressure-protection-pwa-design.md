@@ -212,17 +212,19 @@ Mock and hardware samples are deliberately indistinguishable after normalization
 
 ### 3.2 Home `/`
 
-**Purpose:** Establish premium product credibility and communicate the system state within five seconds.
+**Purpose:** Act as a Flight Experience Center that establishes premium product credibility and makes the aviation ear-pressure use case understandable within three seconds.
 
 **Hero section:**
 
 - Product name and short bilingual value statement.
-- A large animated pressure-orbit visualization, not a dashboard table.
+- A large animated `Pressure Sphere` is the primary visual, not a dashboard table.
+- The sphere uses concentric atmospheric shells, a flight-path arc, and a controlled pressure pulse to make cabin-pressure change physically legible.
 - Four live hero metrics:
   - Current Comfort Score
   - Current Risk Level
   - Current Flight Phase
   - Current Environmental Pressure
+- Environmental pressure appears at the sphere core; Comfort Score, Risk Level, and flight phase sit on its surrounding orbital labels.
 - Metrics initially use the deterministic User A descent snapshot and update when a session is active.
 - Primary CTA: Start Demo.
 - Secondary CTA: Connect Device.
@@ -233,7 +235,7 @@ Mock and hardware samples are deliberately indistinguishable after normalization
 - Each card uses one concise sentence and a custom data visualization detail.
 - A final horizontal narrative strip shows `Profile -> Predict -> Decide -> Adapt`.
 
-**Visual rule:** No sidebar, dense metric grid, admin-table treatment, or developer console styling.
+**Visual rule:** The page is a cinematic Flight Experience Center. It has no sidebar, dense metric grid, admin-table treatment, or developer console styling.
 
 ### 3.3 Device Connection `/device`
 
@@ -278,8 +280,10 @@ Mock and hardware samples are deliberately indistinguishable after normalization
 
 **Visualization:**
 
-- A centered bilateral ear comparison visual uses two pressure rings whose radius, glow, and color reflect each risk score.
-- A radar chart compares left and right across sensitivity, equalization burden, discomfort history, congestion influence, and adaptation capacity.
+- A `Digital Ear Twin Visualization` is the primary page visual.
+- It presents a stylized head/ear silhouette with independent left and right pressure fields whose radius, waveform, glow, and color reflect each ear's risk and adaptation capacity.
+- Selecting either ear reveals its risk components without leaving the visual.
+- A compact radar chart compares left and right across sensitivity, equalization burden, discomfort history, congestion influence, and adaptation capacity as supporting evidence only.
 - Result cards show left risk, right risk, tolerance, and adaptation speed.
 - The form supports fine adjustment but never visually dominates the comparison.
 
@@ -327,7 +331,9 @@ Mock and hardware samples are deliberately indistinguishable after normalization
 - Historical environmental pressure is a solid line.
 - Forecast environmental pressure is a dashed line.
 - Target pressure is a luminous smooth line.
+- A dedicated dynamic timeline labels Now, +5 min, +10 min, and +15 min and advances in sync with the chart.
 - A moving time cursor animates through forecast points so the environmental-versus-target gap is visibly created over time.
+- Timeline checkpoints update their pressure values and active state as the cursor passes them.
 - Left and right target curves may be toggled; the more sensitive ear is selected by default.
 - The animation restarts when phase, profile, or prediction changes and respects reduced-motion preferences.
 
@@ -344,7 +350,7 @@ Mock and hardware samples are deliberately indistinguishable after normalization
 
 Each card shows a short decision flow:
 
-`Ear Risk -> Pressure Stress -> Adaptation Level -> Smoothing Factor -> Recommendation`
+`Ear Risk -> Pressure Stress -> Adaptation Level -> Target Curve`
 
 Each card includes:
 
@@ -352,6 +358,7 @@ Each card includes:
 - Shared Pressure Stress Index
 - Adaptation Level 1-5
 - Smoothing factor
+- A target-curve preview generated from that ear's smoothing factor
 - Plain-language strategy explanation
 - Direction indicator showing why the result differs from the other ear
 
@@ -781,6 +788,17 @@ Because Web Bluetooth types are not consistently included in standard TypeScript
 4. **Mobile first:** Primary actions stay reachable near the bottom; dense details progressively disclose.
 5. **Demonstration ready:** Important states remain legible from a short viewing distance.
 
+Apple Health, Oura Ring, WHOOP, and DJI Fly are quality references for restraint, hierarchy, motion, and data legibility. The application does not copy their assets or exact layouts.
+
+### 7.1.1 Comprehension milestones
+
+- **3 seconds:** The home hero, Pressure Sphere, aircraft path, kPa unit, and descent label make it unmistakable that this is an aviation ear-pressure management system.
+- **30 seconds:** The Digital Ear Twin clearly communicates that the user has different left- and right-ear profiles.
+- **60 seconds:** The animated prediction timeline communicates that the system forecasts environmental pressure and compares it with a smoother target response.
+- **90 seconds:** Parallel left/right decision paths communicate that each ear receives an independent adaptation level and target curve.
+
+The timed exhibition walkthrough records whether a first-time viewer can correctly state each message at the corresponding milestone.
+
 ### 7.2 Color tokens
 
 ```text
@@ -979,4 +997,3 @@ This is the design-level order. The detailed test-first implementation plan is c
 - Real-time collaboration or multi-device BLE management.
 - Complex questionnaire or medical record collection.
 - A general-purpose analytics dashboard.
-
