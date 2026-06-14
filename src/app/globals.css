@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --ink-950: #06111f;
+  --ink-900: #0b1c31;
+  --sky-500: #38a7ff;
+  --cyan-400: #41e2e8;
+  --indigo-400: #818cf8;
+  --cloud-50: #f6fafd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ink-950);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--ink-950);
+  color: var(--cloud-50);
+  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
