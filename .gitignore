@@ -1,0 +1,10 @@
+.DS_Store
+.worktrees/
+node_modules/
+.next/
+coverage/
+playwright-report/
+test-results/
+public/sw.js
+public/sw.js.map
+.pio/
