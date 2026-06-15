@@ -1,14 +1,18 @@
+"use client";
+
 import { CloudSlash } from "@phosphor-icons/react/dist/ssr";
+import { translate } from "@/i18n/messages";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function OfflinePage() {
+  const locale = useAppStore((state) => state.locale);
+
   return (
     <main className="offline-page">
       <CloudSlash size={52} weight="duotone" />
-      <p>AeroBalance Offline</p>
-      <h1>演示资源暂不可用</h1>
-      <span>
-        首次打开需要网络连接。完成首次加载后，应用外壳可离线使用。
-      </span>
+      <p>{translate(locale, "offline.badge")}</p>
+      <h1>{translate(locale, "offline.title")}</h1>
+      <span>{translate(locale, "offline.body")}</span>
     </main>
   );
 }

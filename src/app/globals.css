@@ -315,6 +315,30 @@
   background: rgba(148, 163, 184, 0.25);
 }
 
+.desktop-nav {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.desktop-nav a {
+  padding: 0.45rem 0.65rem;
+  color: #5b7d96;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 999px;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a[aria-current="page"] {
+  color: #0d6da8;
+  background: rgba(191, 231, 250, 0.72);
+}
+
 /* ── Bottom Navigation ─────────────────────────────────────── */
 .bottom-nav {
   position: fixed;
@@ -832,6 +856,63 @@
 
 .simulator__chart .recharts-surface {
   overflow: visible;
+}
+
+.simulator__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.simulator-control,
+.simulator-speed {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-aviation-line);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 8px 20px rgba(38, 113, 159, 0.07);
+}
+
+.simulator-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  color: #315f82;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.85rem;
+  cursor: pointer;
+}
+
+.simulator-control--primary {
+  color: #fff;
+  background: linear-gradient(135deg, #1677b8, #43bde9);
+  border-color: rgba(14, 102, 158, 0.24);
+}
+
+.simulator-speed {
+  display: inline-flex;
+  margin-left: auto;
+  padding: 0.2rem;
+  border-radius: 0.85rem;
+}
+
+.simulator-speed button {
+  min-width: 2.5rem;
+  padding: 0 0.55rem;
+  color: #6688a3;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: transparent;
+  border: 0;
+  border-radius: 0.65rem;
+  cursor: pointer;
+}
+
+.simulator-speed button[aria-pressed="true"] {
+  color: #0d6da8;
+  background: rgba(191, 231, 250, 0.9);
 }
 
 /* ── Prediction page ───────────────────────────────────────── */
@@ -1519,4 +1600,24 @@
 .border-slate-800,
 .border-slate-800\/80 {
   border-color: rgba(38, 125, 178, 0.18) !important;
+}
+
+@media (min-width: 768px) {
+  .app-header,
+  .app-header__inner {
+    height: 3.5rem;
+  }
+
+  .app-header__inner {
+    width: min(1180px, 100%);
+  }
+
+  .desktop-nav {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .bottom-nav {
+    display: none;
+  }
 }

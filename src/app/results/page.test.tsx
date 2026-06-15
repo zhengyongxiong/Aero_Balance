@@ -32,3 +32,16 @@ it("stores the report before opening the dedicated print route", async () => {
     "noopener,noreferrer",
   );
 });
+
+it("restarts the demo and returns to the home route", async () => {
+  const user = userEvent.setup();
+
+  render(<ResultsPage />);
+  const restart = screen.getByRole("link", { name: "重新开始" });
+
+  expect(restart).toHaveAttribute("href", "/");
+  await user.click(restart);
+
+  expect(useAppStore.getState().analysis).toBeNull();
+  expect(useAppStore.getState().pressureHistory).toHaveLength(0);
+});

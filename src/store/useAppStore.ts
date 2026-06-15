@@ -5,7 +5,11 @@ import { persist } from "zustand/middleware";
 import { calculateEarProfile } from "@/lib/profile";
 import { predictPressure } from "@/lib/prediction";
 import { composeAnalysisResult } from "@/lib/result";
-import { savePressureSample, savePressureSession } from "@/lib/storage";
+import {
+  loadSessionSamples,
+  savePressureSample,
+  savePressureSession,
+} from "@/lib/storage";
 import { createBilateralStrategy } from "@/lib/strategy";
 import { createTargetCurves } from "@/lib/target-curve";
 import type {
@@ -59,6 +63,7 @@ interface AppState {
   setProfile(input: EarProfileInput): void;
   appendPressureSample(sample: PressureSample): void;
   replacePressureHistory(samples: PressureSample[]): void;
+  restoreSession(): Promise<void>;
   resetSession(): void;
 }
 
@@ -144,7 +149,7 @@ const initial = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initial,
       setLocale: (locale) => set({ locale }),
       setPhase: (phase) => set({ phase }),
@@ -219,6 +224,36 @@ export const useAppStore = create<AppState>()(
             ...derive(state.profileInput, pressureHistory),
           };
         }),
+      restoreSession: async () => {
+        const state = get();
+        if (
+          !state.activeSessionId ||
+          state.pressureHistory.length > 0
+        ) {
+          return;
+        }
+
+        try {
+          const samples = await loadSessionSamples(state.activeSessionId);
+          if (samples.length === 0) return;
+
+          set((current) => {
+            const pressureHistory = samples.slice(-360);
+            const latest = pressureHistory.at(-1)!;
+            return {
+              pressureHistory,
+              source: latest.source,
+              phase: latest.phase,
+              ...derive(current.profileInput, pressureHistory),
+            };
+          });
+        } catch {
+          set({
+            notice:
+              "Unable to restore the previous local pressure session.",
+          });
+        }
+      },
       resetSession: () =>
         set((state) => ({
           ...initial,

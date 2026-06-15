@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { loadPrintReport, type AeroBalanceReport } from "@/lib/report";
 import { translate, translateRecommendation } from "@/i18n/messages";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function PrintReportPage() {
   const [report, setReport] = useState<AeroBalanceReport | null>(null);
+  const fallbackLocale = useAppStore((state) => state.locale);
 
   useEffect(() => {
     const loaded = loadPrintReport();
@@ -22,8 +24,8 @@ export default function PrintReportPage() {
   if (!report) {
     return (
       <main className="print-report">
-        <h1>AeroBalance Analysis Report</h1>
-        <p>No completed analysis is available.</p>
+        <h1>{translate(fallbackLocale, "results.printTitle")}</h1>
+        <p>{translate(fallbackLocale, "results.noPrintReport")}</p>
       </main>
     );
   }
@@ -34,7 +36,7 @@ export default function PrintReportPage() {
     <main className="print-report">
       <header>
         <p>AeroBalance</p>
-        <h1>AeroBalance Analysis Report</h1>
+        <h1>{translate(report.locale, "results.printTitle")}</h1>
         <span>
           {new Date(report.generatedAt).toLocaleString(report.locale)}
         </span>

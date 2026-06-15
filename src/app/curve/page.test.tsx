@@ -27,14 +27,14 @@ it("shows distinct average lag values for the two target curves", () => {
     ) / curves.length;
   const leftLag = averageLag("leftTarget");
   const rightLag = averageLag("rightTarget");
-  const leftCard = screen.getByText("Left / 左耳").parentElement;
-  const rightCard = screen.getByText("Right / 右耳").parentElement;
+  const leftCard = screen.getByText("左耳").parentElement;
+  const rightCard = screen.getByText("右耳").parentElement;
 
   expect(leftLag).not.toBeCloseTo(rightLag, 1);
   expect(
-    within(leftCard!).getByText(`Average lag ${leftLag.toFixed(1)} kPa`),
+    within(leftCard!).getByText(`平均滞后 ${leftLag.toFixed(1)} kPa`),
   ).toBeInTheDocument();
   expect(
-    within(rightCard!).getByText(`Average lag ${rightLag.toFixed(1)} kPa`),
+    within(rightCard!).getByText(`平均滞后 ${rightLag.toFixed(1)} kPa`),
   ).toBeInTheDocument();
 });

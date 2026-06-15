@@ -24,7 +24,10 @@ it("loads a seed profile and exposes the next flight step", async () => {
   expect(screen.getAllByText(/左耳/i).length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText(/右耳/i).length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText(/风险评分/i).length).toBeGreaterThanOrEqual(1);
-  expect(screen.getByText(/Generated Outputs/i)).toBeInTheDocument();
+  expect(screen.getByText("画像输出")).toBeInTheDocument();
+  expect(
+    screen.getByText(/左右耳生成独立目标曲线/),
+  ).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "继续" })).toHaveAttribute(
     "href",
     "/flight",

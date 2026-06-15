@@ -23,11 +23,11 @@ it("shows current pressure and prediction boxes", () => {
   expect(state.prediction).not.toBeNull();
 
   // Recharts may render text multiple times - use getAllByText
-  expect(screen.getAllByText(/当前压力/).length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText(/30 sec/i).length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText(/60 sec/i).length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText(/90 sec/i).length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText(/Stress Index/i).length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("当前压力").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("30 秒").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("60 秒").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("90 秒").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("压力负荷指数").length).toBeGreaterThanOrEqual(1);
 });
 
 it("interpolates the 30-second forecast from the current pressure", () => {
@@ -39,7 +39,7 @@ it("interpolates the 30-second forecast from the current pressure", () => {
     (point) => point.kind === "forecast" && point.minuteOffset === 1,
   )!.pressure;
   const expected = ((currentPressure + oneMinutePressure) / 2).toFixed(1);
-  const card = screen.getByText("30 sec").parentElement;
+  const card = screen.getByText("30 秒").parentElement;
 
   expect(card).not.toBeNull();
   expect(within(card!).getByText(expected)).toBeInTheDocument();

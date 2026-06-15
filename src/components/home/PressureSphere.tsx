@@ -53,13 +53,12 @@ export function PressureSphere({
   return (
     <section className="instrument-panel" data-testid="pressure-sphere">
       <p className="instrument-panel__label">
-        {locale === "zh-CN" ? "压力球" : "Pressure Sphere"}
-        <span>Pressure Sphere</span>
+        {translate(locale, "home.pressureSphere")}
       </p>
       <div className="pressure-sphere">
         <Image
           src="/assets/pressure-sphere.png"
-          alt="压力球 Pressure Sphere"
+          alt={translate(locale, "home.pressureSphere")}
           fill
           priority
           sizes="(max-width: 720px) 88vw, 520px"

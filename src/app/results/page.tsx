@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
 import Link from "next/link";
 import {
+  ArrowCounterClockwise,
   ArrowLeft,
   Download,
   Printer,
@@ -63,6 +63,7 @@ export default function ResultsPage() {
   const profileResult = useAppStore((s) => s.profileResult);
   const pressureHistory = useAppStore((s) => s.pressureHistory);
   const phase = useAppStore((s) => s.phase);
+  const resetSession = useAppStore((s) => s.resetSession);
 
   if (!analysis) {
     return (
@@ -99,7 +100,7 @@ export default function ResultsPage() {
     ),
   );
 
-  const exportJson = useCallback(() => {
+  const exportJson = () => {
     const data = {
       exportedAt: new Date().toISOString(),
       reportType: "Flight Health Report",
@@ -149,18 +150,9 @@ export default function ResultsPage() {
     a.download = `aerobalance-report-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [
-    analysis,
-    events,
-    pressureHistory.length,
-    profileResult,
-    protectionEfficiency,
-    stability,
-    strategy,
-    successRate,
-  ]);
+  };
 
-  const handlePrint = useCallback(() => {
+  const handlePrint = () => {
     if (!profileResult || !strategy || pressureHistory.length === 0) return;
 
     savePrintReport(
@@ -174,13 +166,7 @@ export default function ResultsPage() {
       }),
     );
     window.open("/report/print", "_blank", "noopener,noreferrer");
-  }, [
-    analysis,
-    locale,
-    pressureHistory,
-    profileResult,
-    strategy,
-  ]);
+  };
 
   const riskColor =
     analysis.riskLevel === "high"
@@ -206,14 +192,20 @@ export default function ResultsPage() {
         {translate(locale, "nav.curve")}
       </Link>
 
-      <p className="page-subtitle">Flight Health Report / 飞行健康报告</p>
-      <h1 className="page-title">AeroBalance Health Report</h1>
+      <p className="page-subtitle">
+        {translate(locale, "results.reportSubtitle")}
+      </p>
+      <h1 className="page-title">
+        {translate(locale, "results.reportTitle")}
+      </h1>
 
       <section className="card mb-4 border-sky-400/20">
         <div className="flex items-start gap-3">
           <ChartLineUp size={22} className="text-sky-400 mt-0.5" weight="duotone" />
           <div>
-            <p className="value-label">Final output / 最终输出</p>
+            <p className="value-label">
+              {translate(locale, "results.finalOutput")}
+            </p>
             <p className="text-sm text-slate-300 leading-relaxed">
               {locale === "zh-CN"
                 ? "这份报告是个人耳压画像、压力预测、双耳策略和目标曲线共同生成的最终结果。"
@@ -238,7 +230,9 @@ export default function ResultsPage() {
         <div className="flex items-center gap-2 mb-3">
           <ChartLineUp size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Report Metrics / 报告指标</p>
+            <p className="value-label">
+              {translate(locale, "results.reportMetrics")}
+            </p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN" ? "用于判断本次飞行阶段保护效果。" : "Used to evaluate protection effectiveness for this flight phase."}
             </p>
@@ -257,7 +251,7 @@ export default function ResultsPage() {
         <div className="result-stat">
           <span className="result-stat__label flex items-center gap-1.5">
             <Ear size={16} className="text-sky-400" />
-            左耳负担 / Left burden
+            {translate(locale, "results.leftBurden")}
           </span>
           <span className="result-stat__value text-sky-300">
             {analysis.leftBurden.toFixed(1)}
@@ -266,7 +260,7 @@ export default function ResultsPage() {
         <div className="result-stat">
           <span className="result-stat__label flex items-center gap-1.5">
             <Ear size={16} className="text-purple-400" />
-            右耳负担 / Right burden
+            {translate(locale, "results.rightBurden")}
           </span>
           <span className="result-stat__value text-purple-300">
             {analysis.rightBurden.toFixed(1)}
@@ -275,16 +269,12 @@ export default function ResultsPage() {
         <div className="result-stat">
           <span className="result-stat__label flex items-center gap-1.5">
             <ArrowsLeftRight size={16} className="text-sky-400" />
-            独立适应 / Independent
+            {translate(locale, "results.independent")}
           </span>
           <span className="result-stat__value">
             {strategy?.independent
-              ? locale === "zh-CN"
-                ? "已启用"
-                : "Enabled"
-              : locale === "zh-CN"
-                ? "未启用"
-                : "Disabled"}
+              ? translate(locale, "common.enabled")
+              : translate(locale, "common.disabled")}
           </span>
         </div>
         <div className="result-stat">
@@ -301,7 +291,7 @@ export default function ResultsPage() {
       <div className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <Lightbulb size={14} className="text-yellow-400" weight="fill" />
-          {locale === "zh-CN" ? "保护建议" : "Protection advice"}
+          {translate(locale, "strategy.protectionAdvice")}
         </p>
         <div className="flex flex-col gap-2">
           {analysis.recommendationKeys.map((key: RecommendationKey) => (
@@ -324,7 +314,7 @@ export default function ResultsPage() {
 
       <section className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-          Patent story / 专利叙事
+          {translate(locale, "results.patentStory")}
         </p>
         <ol className="space-y-2 text-sm text-slate-300">
           <li className="flex gap-2">
@@ -348,7 +338,7 @@ export default function ResultsPage() {
 
       <div className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">
-          {locale === "zh-CN" ? "导出报告" : "Export report"}
+          {translate(locale, "results.exportReport")}
         </p>
         <div className="results-export">
           <button
@@ -367,6 +357,14 @@ export default function ResultsPage() {
               {locale === "zh-CN" ? "导出 JSON" : "Export JSON"}
             </span>
           </button>
+          <Link
+            href="/"
+            onClick={resetSession}
+            className="action-button action-button--secondary flex-1"
+          >
+            <ArrowCounterClockwise size={20} />
+            <span>{translate(locale, "action.restart")}</span>
+          </Link>
         </div>
         <p className="text-[10px] text-slate-600 text-center mt-3">
           {locale === "zh-CN"

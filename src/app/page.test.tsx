@@ -19,7 +19,7 @@ it("renders the Quiet Instrument flight experience", () => {
     screen.getByRole("img", { name: /日间高空飞机客舱/i }),
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("img", { name: /压力球 pressure sphere/i }),
+    screen.getByRole("img", { name: "压力球" }),
   ).toBeInTheDocument();
   expect(screen.getByTestId("pressure-sphere")).toHaveTextContent("78.0");
   expect(screen.getByTestId("pressure-sphere")).toHaveTextContent("kPa");

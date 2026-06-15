@@ -31,7 +31,9 @@ export function BottomNavigation() {
             href={href}
             key={href}
             aria-current={active ? "page" : undefined}
-            className={active ? "is-active" : undefined}
+            className={`bottom-nav__item${
+              active ? " bottom-nav__item--active" : ""
+            }`}
           >
             <Icon size={21} weight={active ? "fill" : "regular"} />
             <span>{translate(locale, key)}</span>

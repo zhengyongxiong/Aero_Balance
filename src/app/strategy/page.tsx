@@ -16,7 +16,7 @@ import {
 import { useAppStore } from "@/store/useAppStore";
 import { translate, translateRecommendation } from "@/i18n/messages";
 import { ActionButton } from "@/components/ui/ActionButton";
-import type { EarStrategy, RecommendationKey } from "@/types/domain";
+import type { EarStrategy, Locale, RecommendationKey } from "@/types/domain";
 
 const levelLabel = (level: number, locale: string) => {
   const labels: Record<string, string[]> = {
@@ -42,7 +42,7 @@ const PipelineCard = ({
 }: {
   side: "left" | "right";
   strategy: EarStrategy;
-  locale: string;
+  locale: Locale;
 }) => {
   const isLeft = side === "left";
   const tone = isLeft ? "sky" : "purple";
@@ -54,23 +54,34 @@ const PipelineCard = ({
       <div className="flex items-center justify-between mb-3">
         <p className="flex items-center gap-1 text-xs font-semibold">
           <Ear size={16} className={text} />
-          {isLeft ? "Left Ear Profile / 左耳画像" : "Right Ear Profile / 右耳画像"}
+          {translate(
+            locale,
+            isLeft ? "strategy.leftEarProfile" : "strategy.rightEarProfile",
+          )}
         </p>
         <span className={`rounded-full px-2 py-1 text-[10px] ${isLeft ? "bg-sky-400/10 text-sky-300" : "bg-purple-400/10 text-purple-300"}`}>
-          Risk {strategy.riskScore.toFixed(0)}
+          {translate(locale, "strategy.risk")} {strategy.riskScore.toFixed(0)}
         </span>
       </div>
 
       <div className="space-y-2 text-xs">
-        <PipelineStep label="1. Ear Profile" value={locale === "zh-CN" ? "风险 + 敏感度" : "Risk + sensitivity"} tone={tone} />
+        <PipelineStep label={`1. ${translate(locale, "strategy.earProfile")}`} value={translate(locale, "strategy.riskSensitivity")} tone={tone} />
         <div className="flex justify-center text-slate-600"><ArrowDown size={14} /></div>
-        <PipelineStep label="2. Stress Analysis" value={`${strategy.stressIndex.toFixed(0)} / 100`} tone={tone} />
+        <PipelineStep label={`2. ${translate(locale, "strategy.stressAnalysis")}`} value={`${strategy.stressIndex.toFixed(0)} / 100`} tone={tone} />
         <div className="flex justify-center text-slate-600"><ArrowDown size={14} /></div>
-        <PipelineStep label="3. Adaptation Level" value={`Lv.${strategy.level} · ${levelLabel(strategy.level, locale)}`} tone={tone} />
+        <PipelineStep
+          label={`3. ${translate(locale, "strategy.adaptationLevel")}`}
+          value={
+            locale === "zh-CN"
+              ? `等级 ${strategy.level} · ${levelLabel(strategy.level, locale)}`
+              : `Lv.${strategy.level} · ${levelLabel(strategy.level, locale)}`
+          }
+          tone={tone}
+        />
         <div className="flex justify-center text-slate-600"><ArrowDown size={14} /></div>
-        <PipelineStep label="4. Smoothing Factor" value={strategy.smoothingFactor.toFixed(2)} tone={tone} />
+        <PipelineStep label={`4. ${translate(locale, "strategy.smoothingFactor")}`} value={strategy.smoothingFactor.toFixed(2)} tone={tone} />
         <div className="flex justify-center text-slate-600"><ArrowDown size={14} /></div>
-        <PipelineStep label="5. Target Curve" value={locale === "zh-CN" ? "个性化目标压力" : "Personalized target"} tone={tone} />
+        <PipelineStep label={`5. ${translate(locale, "strategy.targetCurve")}`} value={translate(locale, "strategy.personalizedTarget")} tone={tone} />
       </div>
     </div>
   );
@@ -118,13 +129,15 @@ export default function StrategyPage() {
       </Link>
 
       <p className="page-subtitle">{translate(locale, "strategy.title")}</p>
-      <h1 className="page-title">Bilateral Adaptation / 双耳适应策略</h1>
+      <h1 className="page-title">{translate(locale, "strategy.heading")}</h1>
 
       <section className="card mb-4 border-sky-400/20">
         <div className="flex items-start gap-3">
           <ArrowsLeftRight size={22} className="text-sky-400 mt-0.5" weight="duotone" />
           <div>
-            <p className="value-label">Why independent / 为什么左右耳不同</p>
+            <p className="value-label">
+              {translate(locale, "strategy.whyIndependent")}
+            </p>
             <p className="text-sm text-slate-300 leading-relaxed">
               {locale === "zh-CN"
                 ? `左耳风险 ${strategy.left.riskScore.toFixed(0)}，右耳风险 ${strategy.right.riskScore.toFixed(0)}，差异 ${gap.toFixed(0)}。AeroBalance 不是给两只耳朵同一个策略，而是分别计算适应等级和平滑因子。`
@@ -149,7 +162,9 @@ export default function StrategyPage() {
         <div className="flex items-center gap-2 mb-3">
           <Brain size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Decision Pipeline / 决策管线</p>
+            <p className="value-label">
+              {translate(locale, "strategy.decisionPipeline")}
+            </p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN"
                 ? "画像输出 → 压力负荷 → 适应等级 → 平滑因子 → 目标曲线。"
@@ -168,7 +183,9 @@ export default function StrategyPage() {
         <div className="flex items-center gap-2 mb-3">
           <ChartLineUp size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Generated Strategy / 生成策略</p>
+            <p className="value-label">
+              {translate(locale, "strategy.generatedStrategy")}
+            </p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN" ? "策略会直接驱动目标压力曲线。" : "The generated strategy directly drives the target-pressure curve."}
             </p>
@@ -177,25 +194,25 @@ export default function StrategyPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-sky-400/10 bg-slate-950/30 p-3">
-            <p className="value-label">Left / 左耳</p>
+            <p className="value-label">{translate(locale, "common.leftEar")}</p>
             <p className="text-sm text-slate-300 mb-2">
               {levelLabel(strategy.left.level, locale)}
             </p>
             <div className="space-y-1 text-xs text-slate-500">
-              <div className="flex justify-between"><span>Risk</span><span className="text-sky-300">{strategy.left.riskScore.toFixed(0)}</span></div>
-              <div className="flex justify-between"><span>Stress</span><span className="text-sky-300">{strategy.left.stressIndex.toFixed(0)}</span></div>
-              <div className="flex justify-between"><span>Smoothing</span><span className="text-sky-300">{strategy.left.smoothingFactor.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.risk")}</span><span className="text-sky-300">{strategy.left.riskScore.toFixed(0)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.stress")}</span><span className="text-sky-300">{strategy.left.stressIndex.toFixed(0)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.smoothing")}</span><span className="text-sky-300">{strategy.left.smoothingFactor.toFixed(2)}</span></div>
             </div>
           </div>
           <div className="rounded-lg border border-purple-400/10 bg-slate-950/30 p-3">
-            <p className="value-label">Right / 右耳</p>
+            <p className="value-label">{translate(locale, "common.rightEar")}</p>
             <p className="text-sm text-slate-300 mb-2">
               {levelLabel(strategy.right.level, locale)}
             </p>
             <div className="space-y-1 text-xs text-slate-500">
-              <div className="flex justify-between"><span>Risk</span><span className="text-purple-300">{strategy.right.riskScore.toFixed(0)}</span></div>
-              <div className="flex justify-between"><span>Stress</span><span className="text-purple-300">{strategy.right.stressIndex.toFixed(0)}</span></div>
-              <div className="flex justify-between"><span>Smoothing</span><span className="text-purple-300">{strategy.right.smoothingFactor.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.risk")}</span><span className="text-purple-300">{strategy.right.riskScore.toFixed(0)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.stress")}</span><span className="text-purple-300">{strategy.right.stressIndex.toFixed(0)}</span></div>
+              <div className="flex justify-between"><span>{translate(locale, "strategy.smoothing")}</span><span className="text-purple-300">{strategy.right.smoothingFactor.toFixed(2)}</span></div>
             </div>
           </div>
         </div>
@@ -204,7 +221,7 @@ export default function StrategyPage() {
       <div className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <CheckCircle size={14} className="text-yellow-400" weight="fill" />
-          {locale === "zh-CN" ? "保护建议" : "Protection advice"}
+          {translate(locale, "strategy.protectionAdvice")}
         </p>
         <div className="flex flex-col gap-2">
           {analysis?.recommendationKeys.map((key: RecommendationKey) => {
@@ -231,7 +248,7 @@ export default function StrategyPage() {
       {profileResult && (
         <section className="card mb-4">
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-            Patent distinction / 专利差异
+            {translate(locale, "strategy.patentDistinction")}
           </p>
           <p className="text-sm text-slate-300 leading-relaxed">
             {locale === "zh-CN"

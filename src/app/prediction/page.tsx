@@ -129,8 +129,12 @@ export default function PredictionPage() {
     .slice(-24)
     .map((p) => ({
       time: p.kind === "history"
-        ? `${Math.round(p.minuteOffset)}m`
-        : `+${p.minuteOffset}m`,
+        ? locale === "zh-CN"
+          ? `${Math.round(p.minuteOffset)} 分钟`
+          : `${Math.round(p.minuteOffset)}m`
+        : locale === "zh-CN"
+          ? `+${p.minuteOffset} 分钟`
+          : `+${p.minuteOffset}m`,
       pressure: Number(p.pressure.toFixed(1)),
       kind: p.kind,
     }));
@@ -155,13 +159,17 @@ export default function PredictionPage() {
       </Link>
 
       <p className="page-subtitle">{translate(locale, "prediction.title")}</p>
-      <h1 className="page-title">Pressure Prediction / 压力预测</h1>
+      <h1 className="page-title">
+        {translate(locale, "prediction.heading")}
+      </h1>
 
       <section className="card mb-4 border-sky-400/20">
         <div className="flex items-start gap-3">
           <Brain size={22} className="text-sky-400 mt-0.5" weight="duotone" />
           <div>
-            <p className="value-label">Predictive protection / 预测式保护</p>
+            <p className="value-label">
+              {translate(locale, "prediction.predictiveProtection")}
+            </p>
             <p className="text-sm text-slate-300 leading-relaxed">
               {locale === "zh-CN"
                 ? "系统不是等耳压不适发生后才反应，而是提前 30/60/90 秒预测压力负荷，并把它送入双耳策略。"
@@ -172,7 +180,9 @@ export default function PredictionPage() {
       </section>
 
       <div className="card card-highlight text-center mb-4">
-        <p className="value-label">Current Pressure / 当前压力</p>
+        <p className="value-label">
+          {translate(locale, "prediction.currentPressure")}
+        </p>
         <p className="value-large text-sky-300">
           {currentPressure.toFixed(1)}
           <span className="text-base font-normal text-slate-500 ml-1">kPa</span>
@@ -197,7 +207,9 @@ export default function PredictionPage() {
         <div className="flex items-center gap-2 mb-3">
           <ChartLineUp size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Short-horizon Forecast / 短周期预测</p>
+            <p className="value-label">
+              {translate(locale, "prediction.shortForecast")}
+            </p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN"
                 ? "用于判断即将出现的耳膜压力负荷。"
@@ -206,9 +218,9 @@ export default function PredictionPage() {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <PredictionCard label="30 sec" value={p30} delta={p30 - currentPressure} tone="sky" />
-          <PredictionCard label="60 sec" value={p60} delta={p60 - currentPressure} tone="purple" />
-          <PredictionCard label="90 sec" value={p90} delta={p90 - currentPressure} tone="cyan" />
+          <PredictionCard label={locale === "zh-CN" ? "30 秒" : "30 sec"} value={p30} delta={p30 - currentPressure} tone="sky" />
+          <PredictionCard label={locale === "zh-CN" ? "60 秒" : "60 sec"} value={p60} delta={p60 - currentPressure} tone="purple" />
+          <PredictionCard label={locale === "zh-CN" ? "90 秒" : "90 sec"} value={p90} delta={p90 - currentPressure} tone="cyan" />
         </div>
       </section>
 
@@ -216,7 +228,9 @@ export default function PredictionPage() {
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-sky-400" />
-            <p className="value-label">Confidence / 预测置信度</p>
+            <p className="value-label">
+              {translate(locale, "prediction.confidence")}
+            </p>
           </div>
           <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2 py-1 text-[10px] text-sky-300">
             {prediction.confidence.toFixed(0)}%
@@ -241,7 +255,7 @@ export default function PredictionPage() {
 
       <div className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-          Prediction Curve / 预测曲线
+          {translate(locale, "prediction.curve")}
         </p>
         <div className="h-48">
           <ResponsiveContainer
@@ -290,7 +304,7 @@ export default function PredictionPage() {
 
       <section className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-          Stress Index / 压力负荷指数
+          {translate(locale, "prediction.stressIndex")}
         </p>
         <div className="flex items-center gap-3">
           <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">

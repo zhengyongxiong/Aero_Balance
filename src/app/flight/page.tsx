@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AirplaneTakeoff,
   AirplaneInFlight,
   AirplaneLanding,
   AirplaneTilt,
+  ArrowCounterClockwise,
   CaretDown,
   CaretUp,
+  Pause,
+  Play,
 } from "@phosphor-icons/react";
 import {
   LineChart,
@@ -79,15 +82,22 @@ const createPhaseSamples = (phase: Exclude<FlightPhase, "demo">) =>
 export default function FlightPage() {
   const locale = useAppStore((s) => s.locale);
   const phase = useAppStore((s) => s.phase);
+  const source = useAppStore((s) => s.source);
   const analysis = useAppStore((s) => s.analysis);
   const pressureHistory = useAppStore((s) => s.pressureHistory);
   const prediction = useAppStore((s) => s.prediction);
+  const isPlaying = useAppStore((s) => s.isPlaying);
+  const playbackSpeed = useAppStore((s) => s.playbackSpeed);
   const loadSeedProfile = useAppStore((s) => s.loadSeedProfile);
+  const appendPressureSample = useAppStore((s) => s.appendPressureSample);
   const replacePressureHistory = useAppStore((s) => s.replacePressureHistory);
   const setPhase = useAppStore((s) => s.setPhase);
+  const setPlayback = useAppStore((s) => s.setPlayback);
+  const setPlaybackSpeed = useAppStore((s) => s.setPlaybackSpeed);
   const [selected, setSelected] = useState<Exclude<FlightPhase, "demo">>(phase === "demo" ? "descent" : (phase as Exclude<FlightPhase, "demo">));
+  const [playbackIndex, setPlaybackIndex] = useState(3);
+  const phaseSamples = useMemo(() => createPhaseSamples(selected), [selected]);
 
-  // Load on mount
   useEffect(() => {
     const state = useAppStore.getState();
     if (!state.profileInput) {
@@ -99,11 +109,45 @@ export default function FlightPage() {
           ? "descent"
           : (state.phase as Exclude<FlightPhase, "demo">);
       setSelected(initialPhase);
-      replacePressureHistory(createPhaseSamples(initialPhase));
+      const samples = createPhaseSamples(initialPhase);
+      setPlaybackIndex(Math.min(3, samples.length));
+      replacePressureHistory(samples.slice(0, 3));
+      setPhase(initialPhase);
+      setPlayback(true);
     }
-  }, [loadSeedProfile, replacePressureHistory]);
+  }, [
+    loadSeedProfile,
+    replacePressureHistory,
+    setPhase,
+    setPlayback,
+  ]);
+
+  useEffect(() => {
+    if (!isPlaying || source === "bluetooth") return;
+
+    if (playbackIndex >= phaseSamples.length) {
+      setPlayback(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      appendPressureSample(phaseSamples[playbackIndex]);
+      setPlaybackIndex((current) => current + 1);
+    }, playbackSpeed === 4 ? 250 : 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    appendPressureSample,
+    isPlaying,
+    phaseSamples,
+    playbackIndex,
+    playbackSpeed,
+    setPlayback,
+    source,
+  ]);
 
   const latest = pressureHistory.at(-1);
+  const previous = pressureHistory.at(-2);
   const currentPressure = latest?.pressure ?? 78;
   const comfortScore = analysis?.comfortScore ?? 70;
   const riskLevel = analysis?.riskLevel ?? "medium";
@@ -111,6 +155,12 @@ export default function FlightPage() {
   const isRising = prediction?.trend === "rising";
   const isFalling = prediction?.trend === "falling";
   const desc = locale === "zh-CN" ? meta.descZh : meta.descEn;
+  const pressureRate =
+    latest && previous && latest.timestamp !== previous.timestamp
+      ? ((latest.pressure - previous.pressure) /
+          (latest.timestamp - previous.timestamp)) *
+        60_000
+      : 0;
 
   // Chart data from pressure history, filtered by phase
   const chartData = pressureHistory
@@ -125,9 +175,26 @@ export default function FlightPage() {
     }));
 
   const handlePhaseChange = (p: Exclude<FlightPhase, "demo">) => {
+    const samples = createPhaseSamples(p);
     setSelected(p);
-    replacePressureHistory(createPhaseSamples(p));
+    setPlaybackIndex(Math.min(3, samples.length));
+    replacePressureHistory(samples.slice(0, 3));
     setPhase(p);
+    setPlayback(true);
+  };
+
+  const restartPhase = () => {
+    setPlaybackIndex(Math.min(3, phaseSamples.length));
+    replacePressureHistory(phaseSamples.slice(0, 3));
+    setPlayback(true);
+  };
+
+  const togglePlayback = () => {
+    if (!isPlaying && playbackIndex >= phaseSamples.length) {
+      restartPhase();
+      return;
+    }
+    setPlayback(!isPlaying);
   };
 
   return (
@@ -155,6 +222,70 @@ export default function FlightPage() {
             );
           })}
         </nav>
+
+        <div
+          className="simulator__controls"
+          aria-label={locale === "zh-CN" ? "模拟控制" : "Simulator controls"}
+        >
+          <button
+            type="button"
+            className="simulator-control simulator-control--primary"
+            aria-label={
+              isPlaying
+                ? locale === "zh-CN"
+                  ? "暂停模拟"
+                  : "Pause simulator"
+                : locale === "zh-CN"
+                  ? "播放模拟"
+                  : "Play simulator"
+            }
+            onClick={togglePlayback}
+          >
+            {isPlaying ? (
+              <Pause size={18} weight="fill" />
+            ) : (
+              <Play size={18} weight="fill" />
+            )}
+            <span>
+              {isPlaying
+                ? locale === "zh-CN"
+                  ? "暂停"
+                  : "Pause"
+                : locale === "zh-CN"
+                  ? "播放"
+                  : "Play"}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="simulator-control"
+            aria-label={
+              locale === "zh-CN"
+                ? "重新播放当前阶段"
+                : "Restart current phase"
+            }
+            onClick={restartPhase}
+          >
+            <ArrowCounterClockwise size={18} />
+            <span>{locale === "zh-CN" ? "重置" : "Restart"}</span>
+          </button>
+          <div
+            className="simulator-speed"
+            aria-label={locale === "zh-CN" ? "播放速度" : "Playback speed"}
+          >
+            {([1, 4] as const).map((speed) => (
+              <button
+                type="button"
+                key={speed}
+                aria-label={`${speed}x`}
+                aria-pressed={playbackSpeed === speed}
+                onClick={() => setPlaybackSpeed(speed)}
+              >
+                {speed}x
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Phase badge */}
         <div
@@ -186,7 +317,7 @@ export default function FlightPage() {
         {/* Pressure chart */}
         <div className="card">
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-            压力趋势
+            {translate(locale, "flight.pressureTrend")}
           </p>
           <div className="simulator__chart">
             <ResponsiveContainer
@@ -228,17 +359,16 @@ export default function FlightPage() {
           </div>
         </div>
 
-        {/* Key metrics */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="card text-center">
-            <p className="value-label">压力</p>
+            <p className="value-label">{translate(locale, "flight.pressure")}</p>
             <p className="value-medium text-sky-300">
               {currentPressure.toFixed(1)}
             </p>
             <p className="text-[10px] text-slate-600">kPa</p>
           </div>
           <div className="card text-center">
-            <p className="value-label">舒适度</p>
+            <p className="value-label">{translate(locale, "flight.comfort")}</p>
             <p
               className={`value-medium ${
                 comfortScore >= 70
@@ -253,10 +383,24 @@ export default function FlightPage() {
             <p className="text-[10px] text-slate-600">/100</p>
           </div>
           <div className="card text-center">
-            <p className="value-label">风险</p>
-            <span className={`risk-badge risk-badge--${riskLevel} mt-1`}>
-              {translate(locale, `risk.${riskLevel}` as any)}
-            </span>
+            <p className="value-label">dP/dt</p>
+            <p className="value-medium text-cyan-300">
+              {pressureRate >= 0 ? "+" : ""}
+              {pressureRate.toFixed(2)}
+            </p>
+            <p className="text-[10px] text-slate-600">kPa/min</p>
+          </div>
+          <div className="card text-center">
+            <p className="value-label">
+              {translate(locale, "flight.source")}
+            </p>
+            <p className="value-medium text-purple-300">
+              {latest?.source === "bluetooth" ? "BLE" : "Demo"}
+            </p>
+            <p className="text-[10px] text-slate-600">
+              {latest?.temperature?.toFixed(1) ?? "--"} °C ·{" "}
+              {latest?.battery ?? "--"}%
+            </p>
           </div>
         </div>
 

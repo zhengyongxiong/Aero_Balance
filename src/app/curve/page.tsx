@@ -16,12 +16,6 @@ import { useAppStore } from "@/store/useAppStore";
 import { translate } from "@/i18n/messages";
 import { ActionButton } from "@/components/ui/ActionButton";
 
-const curveLabel = (locale: string) => ({
-  env: locale === "zh-CN" ? "环境压力" : "Environmental",
-  left: locale === "zh-CN" ? "左耳目标" : "Left Target",
-  right: locale === "zh-CN" ? "右耳目标" : "Right Target",
-});
-
 const smoothingText = (value: number, locale: string) => {
   if (value > 0.6) {
     return locale === "zh-CN" ? "高平滑保护" : "High smoothing";
@@ -53,11 +47,24 @@ export default function CurvePage() {
     );
   }
 
-  const labels = curveLabel(locale);
+  const labels = {
+    env: translate(locale, "curve.environmentalPressure"),
+    left:
+      locale === "zh-CN"
+        ? `${translate(locale, "common.leftEar")}目标`
+        : "Left Target",
+    right:
+      locale === "zh-CN"
+        ? `${translate(locale, "common.rightEar")}目标`
+        : "Right Target",
+  };
   const origin = targetCurves[0].timestamp;
   const chartData = targetCurves.slice(-50).map((p, index) => ({
     index,
-    time: `${((p.timestamp - origin) / 1000).toFixed(0)}s`,
+    time:
+      locale === "zh-CN"
+        ? `${((p.timestamp - origin) / 1000).toFixed(0)}秒`
+        : `${((p.timestamp - origin) / 1000).toFixed(0)}s`,
     env: Number(p.environmental.toFixed(1)),
     left: Number(p.leftTarget.toFixed(1)),
     right: Number(p.rightTarget.toFixed(1)),
@@ -87,13 +94,15 @@ export default function CurvePage() {
       </Link>
 
       <p className="page-subtitle">{translate(locale, "curve.title")}</p>
-      <h1 className="page-title">Target Pressure Curve / 目标压力曲线</h1>
+      <h1 className="page-title">{translate(locale, "curve.heading")}</h1>
 
       <section className="card mb-4 border-sky-400/20">
         <div className="flex items-start gap-3">
           <ChartLineUp size={22} className="text-sky-400 mt-0.5" weight="duotone" />
           <div>
-            <p className="value-label">Patent visualization / 专利可视化</p>
+            <p className="value-label">
+              {translate(locale, "curve.patentVisualization")}
+            </p>
             <p className="text-sm text-slate-300 leading-relaxed">
               {locale === "zh-CN"
                 ? "环境压力变化很快；目标压力曲线把突变平滑成左右耳各自可承受的适应路径。这是 AeroBalance 与普通耳塞最大的差异。"
@@ -107,7 +116,7 @@ export default function CurvePage() {
         <div className="flex items-center gap-2 mb-3">
           <Target size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Curve Engine / 目标曲线引擎</p>
+            <p className="value-label">{translate(locale, "curve.engine")}</p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN"
                 ? "策略输出中的左右平滑因子，分别生成两条目标压力曲线。"
@@ -117,13 +126,13 @@ export default function CurvePage() {
         </div>
 
         <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500">
-          <span>Environmental Pressure</span>
+          <span>{translate(locale, "curve.environmentalPressure")}</span>
           <span>→</span>
-          <span>Left/Right Smoothing</span>
+          <span>{translate(locale, "curve.leftRightSmoothing")}</span>
           <span>→</span>
-          <span>Target Curve</span>
+          <span>{translate(locale, "curve.targetCurve")}</span>
           <span>→</span>
-          <span>Flight Health Report</span>
+          <span>{translate(locale, "curve.healthReport")}</span>
         </div>
       </section>
 
@@ -204,7 +213,9 @@ export default function CurvePage() {
         <div className="flex items-center gap-2 mb-3">
           <Waveform size={18} className="text-sky-400" />
           <div>
-            <p className="value-label">Smoothing Difference / 平滑差异</p>
+            <p className="value-label">
+              {translate(locale, "curve.smoothingDifference")}
+            </p>
             <p className="text-[11px] text-slate-500">
               {locale === "zh-CN" ? "两条目标曲线不是同一条线，而是由左右耳风险分别决定。" : "The two target curves are not identical; they are shaped by each ear's risk."}
             </p>
@@ -213,35 +224,45 @@ export default function CurvePage() {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-sky-400/10 bg-slate-950/30 p-3">
-            <p className="value-label">Left / 左耳</p>
+            <p className="value-label">{translate(locale, "common.leftEar")}</p>
             <p className="value-medium text-sky-300">{smoothingLeft.toFixed(2)}</p>
             <p className="text-[10px] text-slate-500 mt-1">{smoothingText(smoothingLeft, locale)}</p>
-            <p className="text-[11px] text-slate-500 mt-3">Average lag {leftAverageLag.toFixed(1)} kPa</p>
+            <p className="text-[11px] text-slate-500 mt-3">
+              {translate(locale, "curve.averageLag")} {leftAverageLag.toFixed(1)} kPa
+            </p>
           </div>
           <div className="rounded-lg border border-purple-400/10 bg-slate-950/30 p-3">
-            <p className="value-label">Right / 右耳</p>
+            <p className="value-label">{translate(locale, "common.rightEar")}</p>
             <p className="value-medium text-purple-300">{smoothingRight.toFixed(2)}</p>
             <p className="text-[10px] text-slate-500 mt-1">{smoothingText(smoothingRight, locale)}</p>
-            <p className="text-[11px] text-slate-500 mt-3">Average lag {rightAverageLag.toFixed(1)} kPa</p>
+            <p className="text-[11px] text-slate-500 mt-3">
+              {translate(locale, "curve.averageLag")} {rightAverageLag.toFixed(1)} kPa
+            </p>
           </div>
         </div>
       </section>
 
       <section className="card mb-4">
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-          Environmental vs Target / 环境与目标
+          {translate(locale, "curve.environmentalVsTarget")}
         </p>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="rounded-lg bg-slate-950/30 p-2">
-            <p className="value-label">Env range</p>
+            <p className="value-label">
+              {translate(locale, "curve.environmentalRange")}
+            </p>
             <p className="text-sm font-mono text-slate-200">{environmentalRange.toFixed(1)}</p>
           </div>
           <div className="rounded-lg bg-slate-950/30 p-2">
-            <p className="value-label">Left avg lag</p>
+            <p className="value-label">
+              {translate(locale, "curve.leftAverageLag")}
+            </p>
             <p className="text-sm font-mono text-sky-300">{leftAverageLag.toFixed(1)}</p>
           </div>
           <div className="rounded-lg bg-slate-950/30 p-2">
-            <p className="value-label">Right avg lag</p>
+            <p className="value-label">
+              {translate(locale, "curve.rightAverageLag")}
+            </p>
             <p className="text-sm font-mono text-purple-300">{rightAverageLag.toFixed(1)}</p>
           </div>
         </div>
