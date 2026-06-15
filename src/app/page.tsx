@@ -35,8 +35,8 @@ export default function HomePage() {
     <main className="home-page">
       <section className="flight-hero">
         <Image
-          src="/assets/flight-horizon.png"
-          alt="高空下降飞行环境"
+          src="/assets/aircraft-cabin-daylight-v2.png"
+          alt="日间高空飞机客舱"
           fill
           priority
           sizes="100vw"
@@ -78,6 +78,9 @@ export default function HomePage() {
         <div className="home-actions">
           <ActionButton href="/profile" icon={AirplaneTilt}>
             {translate(locale, "action.startDemo")}
+          </ActionButton>
+          <ActionButton href="/flight" icon={AirplaneTilt} secondary>
+            {locale === "zh-CN" ? "飞行模拟" : "Flight Simulator"}
           </ActionButton>
           <ActionButton href="/device" icon={Bluetooth} secondary>
             {translate(locale, "action.connect")}
