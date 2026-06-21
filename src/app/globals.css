@@ -95,6 +95,8 @@
 /* ── Page Layout ───────────────────────────────────────────── */
 @layer components {
   .page-container {
+    box-sizing: border-box;
+    width: 100%;
     max-width: 480px;
     margin: 0 auto;
     padding: 1rem;
@@ -1119,11 +1121,19 @@
 
 .results-export {
   display: flex;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
 .results-export > * {
   flex: 1;
+  min-width: 0;
+}
+
+@media (min-width: 480px) {
+  .results-export {
+    flex-direction: row;
+  }
 }
 
 /* ── Device page ───────────────────────────────────────────── */
