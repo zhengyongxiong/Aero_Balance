@@ -1,14 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import {
-  AirplaneTilt,
-  Bluetooth,
-  ChartLineUp,
-  Ear,
-  Target,
-  UserCircle,
-} from "@phosphor-icons/react";
+import { AirplaneTilt } from "@phosphor-icons/react/AirplaneTilt";
+import { Bluetooth } from "@phosphor-icons/react/Bluetooth";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { Ear } from "@phosphor-icons/react/Ear";
+import { Target } from "@phosphor-icons/react/Target";
+import { UserCircle } from "@phosphor-icons/react/UserCircle";
 import { PressureSphere } from "@/components/home/PressureSphere";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { translate } from "@/i18n/messages";
@@ -26,10 +24,12 @@ export default function HomePage() {
   const locale = useAppStore((state) => state.locale);
   const analysis = useAppStore((state) => state.analysis);
   const phase = useAppStore((state) => state.phase);
+  const source = useAppStore((state) => state.source);
   const latest = useAppStore((state) => state.pressureHistory.at(-1));
-  const pressure = latest?.pressure ?? 78;
-  const comfort = analysis?.comfortScore ?? 74;
-  const risk = analysis?.riskLevel ?? "medium";
+  const isLive = source === "bluetooth";
+  const pressure = latest?.pressure ?? (isLive ? 101.3 : 78);
+  const comfort = analysis?.comfortScore ?? (isLive ? null : 74);
+  const risk = analysis?.riskLevel ?? (isLive ? null : "medium");
 
   return (
     <main className="home-page">
@@ -50,20 +50,36 @@ export default function HomePage() {
           </p>
           <h1>{translate(locale, "home.title")}</h1>
           <p>{translate(locale, "home.subtitle")}</p>
-          <div className="flight-telemetry" aria-label="Descent pressure path">
-            <span>
-              36,000 ft <small>89.0 kPa</small>
-            </span>
-            <span>
-              24,000 ft <small>84.5 kPa</small>
-            </span>
-            <span>
-              12,000 ft <small>82.0 kPa</small>
-            </span>
-            <span className="is-current">
-              2,000 ft <small>{pressure.toFixed(1)} kPa</small>
-            </span>
-          </div>
+          {isLive ? (
+            <div
+              className="flight-telemetry"
+              aria-label={locale === "zh-CN" ? "实时传感器数据" : "Live sensor data"}
+            >
+              <span>
+                {locale === "zh-CN" ? "气压" : "Pressure"}
+                <small>{pressure.toFixed(2)} kPa</small>
+              </span>
+              <span>
+                {locale === "zh-CN" ? "温度" : "Temperature"}
+                <small>{latest?.temperature?.toFixed(1) ?? "--"} °C</small>
+              </span>
+              <span>
+                {locale === "zh-CN" ? "估算海拔" : "Altitude"}
+                <small>{latest?.altitude?.toFixed(1) ?? "--"} m</small>
+              </span>
+              <span className="is-current">
+                {locale === "zh-CN" ? "实时阶段" : "Live phase"}
+                <small>{translate(locale, `phase.${phase}`)}</small>
+              </span>
+            </div>
+          ) : (
+            <div className="flight-telemetry" aria-label="Descent pressure path">
+              <span>36,000 ft <small>89.0 kPa</small></span>
+              <span>24,000 ft <small>84.5 kPa</small></span>
+              <span>12,000 ft <small>82.0 kPa</small></span>
+              <span className="is-current">2,000 ft <small>{pressure.toFixed(1)} kPa</small></span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -77,13 +93,25 @@ export default function HomePage() {
         />
         <div className="home-actions">
           <ActionButton href="/profile" icon={AirplaneTilt}>
-            {translate(locale, "action.startDemo")}
+            {isLive
+              ? locale === "zh-CN"
+                ? "选择个人画像"
+                : "Select Ear Profile"
+              : translate(locale, "action.startDemo")}
           </ActionButton>
           <ActionButton href="/flight" icon={AirplaneTilt} secondary>
-            {translate(locale, "home.flightSimulator")}
+            {isLive
+              ? locale === "zh-CN"
+                ? "查看实时飞行"
+                : "View Live Flight"
+              : translate(locale, "home.flightSimulator")}
           </ActionButton>
           <ActionButton href="/device" icon={Bluetooth} secondary>
-            {translate(locale, "action.connect")}
+            {isLive
+              ? locale === "zh-CN"
+                ? "查看设备数据"
+                : "View Device Data"
+              : translate(locale, "action.connect")}
           </ActionButton>
         </div>
         <ol className="value-chain">

@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  AirplaneTilt,
-  ChartLineUp,
-  House,
-  Target,
-} from "@phosphor-icons/react";
+import { AirplaneTilt } from "@phosphor-icons/react/AirplaneTilt";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { House } from "@phosphor-icons/react/House";
+import { Target } from "@phosphor-icons/react/Target";
 import { translate } from "@/i18n/messages";
 import { useAppStore } from "@/store/useAppStore";
 

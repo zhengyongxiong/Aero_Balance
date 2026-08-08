@@ -1,19 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowCounterClockwise,
-  ArrowLeft,
-  Download,
-  Printer,
-  HeartStraight,
-  ShieldCheck,
-  Ear,
-  ArrowsLeftRight,
-  Gauge,
-  Lightbulb,
-  ChartLineUp,
-} from "@phosphor-icons/react";
+import { ArrowCounterClockwise } from "@phosphor-icons/react/ArrowCounterClockwise";
+import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
+import { ArrowsLeftRight } from "@phosphor-icons/react/ArrowsLeftRight";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { Download } from "@phosphor-icons/react/Download";
+import { Ear } from "@phosphor-icons/react/Ear";
+import { Gauge } from "@phosphor-icons/react/Gauge";
+import { HeartStraight } from "@phosphor-icons/react/HeartStraight";
+import { Lightbulb } from "@phosphor-icons/react/Lightbulb";
+import { Printer } from "@phosphor-icons/react/Printer";
+import { ShieldCheck } from "@phosphor-icons/react/ShieldCheck";
 import { useAppStore } from "@/store/useAppStore";
 import { translate, translateRecommendation } from "@/i18n/messages";
 import { buildReport, savePrintReport } from "@/lib/report";
@@ -63,6 +61,7 @@ export default function ResultsPage() {
   const profileResult = useAppStore((s) => s.profileResult);
   const pressureHistory = useAppStore((s) => s.pressureHistory);
   const phase = useAppStore((s) => s.phase);
+  const source = useAppStore((s) => s.source);
   const resetSession = useAppStore((s) => s.resetSession);
 
   if (!analysis) {
@@ -70,11 +69,19 @@ export default function ResultsPage() {
       <div className="page-container">
         <div className="flex flex-col items-center gap-4 py-20 text-slate-500">
           <HeartStraight size={48} weight="thin" />
-          <p className="text-sm">
-            {locale === "zh-CN" ? "暂无结果数据，请先启动飞行模拟" : "No result data. Start the flight simulator first."}
+          <p className="text-center text-sm">
+            {source === "bluetooth"
+              ? locale === "zh-CN"
+                ? "实时传感器数据已接入。完成个人画像后才会生成正式分析结果。"
+                : "Live sensor data is available. Complete the ear profile to generate formal analysis results."
+              : locale === "zh-CN"
+                ? "暂无结果数据，请先启动飞行模拟"
+                : "No result data. Start the flight simulator first."}
           </p>
-          <Link href="/flight" className="text-xs text-sky-400 underline">
-            {locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
+          <Link href={source === "bluetooth" ? "/profile" : "/flight"} className="text-xs text-sky-400 underline">
+            {source === "bluetooth"
+              ? locale === "zh-CN" ? "选择个人画像" : "Select Ear Profile"
+              : locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
           </Link>
         </div>
       </div>

@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Brain,
-  Ear,
-  ShieldCheck,
-  Speedometer,
-  ChartBar,
-  Waveform,
-  ArrowsLeftRight,
-  ChartLineUp,
-} from "@phosphor-icons/react";
+import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
+import { ArrowsLeftRight } from "@phosphor-icons/react/ArrowsLeftRight";
+import { Brain } from "@phosphor-icons/react/Brain";
+import { ChartBar } from "@phosphor-icons/react/ChartBar";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { Ear } from "@phosphor-icons/react/Ear";
+import { ShieldCheck } from "@phosphor-icons/react/ShieldCheck";
+import { Speedometer } from "@phosphor-icons/react/Speedometer";
+import { Waveform } from "@phosphor-icons/react/Waveform";
 import {
   Radar,
   RadarChart,

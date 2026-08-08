@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  AirplaneTakeoff,
-  AirplaneInFlight,
-  AirplaneLanding,
-  AirplaneTilt,
-  ArrowCounterClockwise,
-  CaretDown,
-  CaretUp,
-  Pause,
-  Play,
-} from "@phosphor-icons/react";
+import { AirplaneInFlight } from "@phosphor-icons/react/AirplaneInFlight";
+import { AirplaneLanding } from "@phosphor-icons/react/AirplaneLanding";
+import { AirplaneTakeoff } from "@phosphor-icons/react/AirplaneTakeoff";
+import { AirplaneTilt } from "@phosphor-icons/react/AirplaneTilt";
+import { ArrowCounterClockwise } from "@phosphor-icons/react/ArrowCounterClockwise";
+import { CaretDown } from "@phosphor-icons/react/CaretDown";
+import { CaretUp } from "@phosphor-icons/react/CaretUp";
+import { Pause } from "@phosphor-icons/react/Pause";
+import { Play } from "@phosphor-icons/react/Play";
 import {
   LineChart,
   Line,
@@ -23,6 +21,7 @@ import {
 } from "recharts";
 import { useAppStore } from "@/store/useAppStore";
 import { translate } from "@/i18n/messages";
+import { BleSampleDetails } from "@/components/device/BleSampleDetails";
 import { PressureSphere } from "@/components/home/PressureSphere";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { seedProfiles, createFlightSeed } from "@/lib/seed";
@@ -97,10 +96,11 @@ export default function FlightPage() {
   const [selected, setSelected] = useState<Exclude<FlightPhase, "demo">>(phase === "demo" ? "descent" : (phase as Exclude<FlightPhase, "demo">));
   const [playbackIndex, setPlaybackIndex] = useState(3);
   const phaseSamples = useMemo(() => createPhaseSamples(selected), [selected]);
+  const isBluetoothLive = source === "bluetooth";
 
   useEffect(() => {
     const state = useAppStore.getState();
-    if (!state.profileInput) {
+    if (!state.profileInput && state.source !== "bluetooth") {
       loadSeedProfile(seedProfiles[0]);
     }
     if (state.source !== "bluetooth") {
@@ -121,6 +121,13 @@ export default function FlightPage() {
     setPhase,
     setPlayback,
   ]);
+
+  useEffect(() => {
+    if (!isBluetoothLive || phase === "demo") return;
+    setSelected((current) =>
+      current === phase ? current : (phase as Exclude<FlightPhase, "demo">),
+    );
+  }, [isBluetoothLive, phase]);
 
   useEffect(() => {
     if (!isPlaying || source === "bluetooth") return;
@@ -149,9 +156,12 @@ export default function FlightPage() {
   const latest = pressureHistory.at(-1);
   const previous = pressureHistory.at(-2);
   const currentPressure = latest?.pressure ?? 78;
-  const comfortScore = analysis?.comfortScore ?? 70;
-  const riskLevel = analysis?.riskLevel ?? "medium";
-  const meta = phaseMeta[selected];
+  const liveSample = latest?.source === "bluetooth" ? latest : null;
+  const currentPhase: FlightPhase = liveSample ? liveSample.phase : selected;
+  const comfortScore = analysis?.comfortScore ?? (isBluetoothLive ? null : 70);
+  const riskLevel = analysis?.riskLevel ?? (isBluetoothLive ? null : "medium");
+  const meta = phaseMeta[currentPhase];
+  const PhaseIcon = meta.icon;
   const isRising = prediction?.trend === "rising";
   const isFalling = prediction?.trend === "falling";
   const desc = locale === "zh-CN" ? meta.descZh : meta.descEn;
@@ -164,7 +174,13 @@ export default function FlightPage() {
 
   // Chart data from pressure history, filtered by phase
   const chartData = pressureHistory
-    .filter((s) => s.phase === selected || s.phase === "demo")
+    .filter(
+      (s) =>
+        isBluetoothLive ||
+        currentPhase === "demo" ||
+        s.phase === currentPhase ||
+        s.phase === "demo",
+    )
     .slice(-60)
     .map((s) => ({
       time: new Date(s.timestamp).toLocaleTimeString(locale, {
@@ -175,6 +191,7 @@ export default function FlightPage() {
     }));
 
   const handlePhaseChange = (p: Exclude<FlightPhase, "demo">) => {
+    if (isBluetoothLive) return;
     const samples = createPhaseSamples(p);
     setSelected(p);
     setPlaybackIndex(Math.min(3, samples.length));
@@ -184,12 +201,14 @@ export default function FlightPage() {
   };
 
   const restartPhase = () => {
+    if (isBluetoothLive) return;
     setPlaybackIndex(Math.min(3, phaseSamples.length));
     replacePressureHistory(phaseSamples.slice(0, 3));
     setPlayback(true);
   };
 
   const togglePlayback = () => {
+    if (isBluetoothLive) return;
     if (!isPlaying && playbackIndex >= phaseSamples.length) {
       restartPhase();
       return;
@@ -207,14 +226,15 @@ export default function FlightPage() {
         <nav className="simulator__nav">
           {PHASES.map((p) => {
             const Icon = phaseMeta[p].icon;
-            const active = selected === p;
+            const active = currentPhase === p;
             return (
               <button
                 key={p}
+                disabled={isBluetoothLive}
                 onClick={() => handlePhaseChange(p)}
                 className={`phase-btn flex items-center gap-1.5 ${
                   active ? "phase-btn--active" : ""
-                }`}
+                } ${isBluetoothLive ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 <Icon size={16} weight={active ? "fill" : "regular"} />
                 {translate(locale, phaseMeta[p].labelKey as any)}
@@ -223,13 +243,23 @@ export default function FlightPage() {
           })}
         </nav>
 
-        <div
-          className="simulator__controls"
-          aria-label={locale === "zh-CN" ? "模拟控制" : "Simulator controls"}
-        >
+        {isBluetoothLive ? (
+          <div className="simulator__controls" role="status">
+            <span className="text-xs text-cyan-300">
+              {locale === "zh-CN"
+                ? `正式模式：已接收 ${pressureHistory.length} 条 BMP390 样本`
+                : `Live mode: ${pressureHistory.length} BMP390 samples received`}
+            </span>
+          </div>
+        ) : (
+          <div
+            className="simulator__controls"
+            aria-label={locale === "zh-CN" ? "模拟控制" : "Simulator controls"}
+          >
           <button
             type="button"
             className="simulator-control simulator-control--primary"
+            disabled={isBluetoothLive}
             aria-label={
               isPlaying
                 ? locale === "zh-CN"
@@ -259,6 +289,7 @@ export default function FlightPage() {
           <button
             type="button"
             className="simulator-control"
+            disabled={isBluetoothLive}
             aria-label={
               locale === "zh-CN"
                 ? "重新播放当前阶段"
@@ -279,13 +310,15 @@ export default function FlightPage() {
                 key={speed}
                 aria-label={`${speed}x`}
                 aria-pressed={playbackSpeed === speed}
+                disabled={isBluetoothLive}
                 onClick={() => setPlaybackSpeed(speed)}
               >
                 {speed}x
               </button>
             ))}
           </div>
-        </div>
+          </div>
+        )}
 
         {/* Phase badge */}
         <div
@@ -296,7 +329,7 @@ export default function FlightPage() {
             color: meta.color,
           }}
         >
-          {(() => { const Icon = phaseMeta[selected].icon; return <Icon size={20} weight="fill" />; })()}
+          <PhaseIcon size={20} weight="fill" />
           {translate(locale, meta.labelKey as any)}
           {isRising && <CaretUp size={16} weight="bold" />}
           {isFalling && <CaretDown size={16} weight="bold" />}
@@ -310,7 +343,7 @@ export default function FlightPage() {
           pressure={currentPressure}
           comfort={comfortScore}
           risk={riskLevel}
-          phase={selected}
+          phase={currentPhase}
           locale={locale}
         />
 
@@ -371,14 +404,16 @@ export default function FlightPage() {
             <p className="value-label">{translate(locale, "flight.comfort")}</p>
             <p
               className={`value-medium ${
-                comfortScore >= 70
+                comfortScore === null
+                  ? "text-slate-400"
+                  : comfortScore >= 70
                   ? "text-green-400"
                   : comfortScore >= 40
                     ? "text-orange-400"
                     : "text-red-400"
               }`}
             >
-              {comfortScore}
+              {comfortScore ?? "--"}
             </p>
             <p className="text-[10px] text-slate-600">/100</p>
           </div>
@@ -399,10 +434,16 @@ export default function FlightPage() {
             </p>
             <p className="text-[10px] text-slate-600">
               {latest?.temperature?.toFixed(1) ?? "--"} °C ·{" "}
-              {latest?.battery ?? "--"}%
+              {isBluetoothLive
+                ? `${latest?.altitude?.toFixed(1) ?? "--"} m`
+                : `${latest?.battery ?? "--"}%`}
             </p>
           </div>
         </div>
+
+        {liveSample && (
+          <BleSampleDetails sample={liveSample} locale={locale} />
+        )}
 
         <div className="page-action">
           <ActionButton href="/prediction">

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Ear, WifiHigh } from "@phosphor-icons/react";
+import { Ear } from "@phosphor-icons/react/Ear";
+import { WifiHigh } from "@phosphor-icons/react/WifiHigh";
 import { translate } from "@/i18n/messages";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -22,7 +23,28 @@ export function AppHeader() {
   const setLocale = useAppStore((state) => state.setLocale);
   const source = useAppStore((state) => state.source);
   const deviceState = useAppStore((state) => state.deviceState);
-  const isConnected = source === "mock" || deviceState === "connected";
+  const isLive = source === "bluetooth";
+  const modeLabel = isLive
+    ? locale === "zh-CN"
+      ? deviceState === "connected"
+        ? "正式模式 · 已连接"
+        : deviceState === "scanning"
+          ? "正式模式 · 连接中"
+        : deviceState === "reconnecting"
+          ? "正式模式 · 重连中"
+          : deviceState === "failed"
+            ? "正式模式 · 连接失败"
+            : "正式模式 · 已断开"
+      : deviceState === "connected"
+        ? "Live Mode · Connected"
+        : deviceState === "scanning"
+          ? "Live Mode · Connecting"
+        : deviceState === "reconnecting"
+          ? "Live Mode · Reconnecting"
+          : deviceState === "failed"
+            ? "Live Mode · Failed"
+            : "Live Mode · Disconnected"
+    : translate(locale, "home.mode");
 
   return (
     <header className="app-header">
@@ -34,16 +56,10 @@ export function AppHeader() {
           <span>
             <strong>AeroBalance</strong>
             <small>
-              {isConnected ? (
-                <>
-                  <WifiHigh size={12} weight="bold" />
-                  {source === "mock"
-                    ? translate(locale, "home.mode")
-                    : deviceState}
-                </>
-              ) : (
-                translate(locale, "home.mode")
+              {(!isLive || deviceState === "connected") && (
+                <WifiHigh size={12} weight="bold" />
               )}
+              {modeLabel}
             </small>
           </span>
         </Link>

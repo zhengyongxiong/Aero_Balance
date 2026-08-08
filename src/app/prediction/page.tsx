@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowLeft,
-  TrendUp,
-  TrendDown,
-  Minus,
-  Brain,
-  ChartLineUp,
-  ShieldCheck,
-} from "@phosphor-icons/react";
+import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
+import { Brain } from "@phosphor-icons/react/Brain";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { Minus } from "@phosphor-icons/react/Minus";
+import { ShieldCheck } from "@phosphor-icons/react/ShieldCheck";
+import { TrendDown } from "@phosphor-icons/react/TrendDown";
+import { TrendUp } from "@phosphor-icons/react/TrendUp";
 import {
   LineChart,
   Line,
@@ -100,17 +98,26 @@ export default function PredictionPage() {
   const prediction = useAppStore((s) => s.prediction);
   const pressureHistory = useAppStore((s) => s.pressureHistory);
   const analysis = useAppStore((s) => s.analysis);
+  const source = useAppStore((s) => s.source);
 
   if (!prediction) {
     return (
       <div className="page-container">
         <div className="flex flex-col items-center gap-4 py-20 text-slate-500">
           <ChartLineUp size={48} weight="thin" />
-          <p className="text-sm">
-            {locale === "zh-CN" ? "暂无预测数据，请先启动飞行模拟" : "No prediction data. Start the flight simulator first."}
+          <p className="text-center text-sm">
+            {source === "bluetooth"
+              ? locale === "zh-CN"
+                ? `正在收集实时传感器样本（${pressureHistory.length}/3），至少需要 3 条数据生成趋势。`
+                : `Collecting live sensor samples (${pressureHistory.length}/3). Three samples are required for a trend.`
+              : locale === "zh-CN"
+                ? "暂无预测数据，请先启动飞行模拟"
+                : "No prediction data. Start the flight simulator first."}
           </p>
-          <Link href="/flight" className="text-xs text-sky-400 underline">
-            {locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
+          <Link href={source === "bluetooth" ? "/device" : "/flight"} className="text-xs text-sky-400 underline">
+            {source === "bluetooth"
+              ? locale === "zh-CN" ? "查看实时设备" : "View Live Device"
+              : locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
           </Link>
         </div>
       </div>

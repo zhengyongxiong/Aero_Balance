@@ -1,18 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowDown,
-  ArrowLeft,
-  Ear,
-  ShieldWarning,
-  Waveform,
-  Target,
-  ArrowsLeftRight,
-  CheckCircle,
-  Brain,
-  ChartLineUp,
-} from "@phosphor-icons/react";
+import { ArrowDown } from "@phosphor-icons/react/ArrowDown";
+import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
+import { ArrowsLeftRight } from "@phosphor-icons/react/ArrowsLeftRight";
+import { Brain } from "@phosphor-icons/react/Brain";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { CheckCircle } from "@phosphor-icons/react/CheckCircle";
+import { Ear } from "@phosphor-icons/react/Ear";
+import { ShieldWarning } from "@phosphor-icons/react/ShieldWarning";
+import { Target } from "@phosphor-icons/react/Target";
+import { Waveform } from "@phosphor-icons/react/Waveform";
 import { useAppStore } from "@/store/useAppStore";
 import { translate, translateRecommendation } from "@/i18n/messages";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -99,17 +97,26 @@ export default function StrategyPage() {
   const strategy = useAppStore((s) => s.strategy);
   const analysis = useAppStore((s) => s.analysis);
   const profileResult = useAppStore((s) => s.profileResult);
+  const source = useAppStore((s) => s.source);
 
   if (!strategy) {
     return (
       <div className="page-container">
         <div className="flex flex-col items-center gap-4 py-20 text-slate-500">
           <ArrowsLeftRight size={48} weight="thin" />
-          <p className="text-sm">
-            {locale === "zh-CN" ? "暂无策略数据，请先启动飞行模拟" : "No strategy data. Start the flight simulator first."}
+          <p className="text-center text-sm">
+            {source === "bluetooth" && !profileResult
+              ? locale === "zh-CN"
+                ? "实时气压已接入。请先选择个人耳压画像，再生成双耳策略。"
+                : "Live pressure is available. Select an ear profile to generate a bilateral strategy."
+              : locale === "zh-CN"
+                ? "暂无策略数据，请先启动飞行模拟"
+                : "No strategy data. Start the flight simulator first."}
           </p>
-          <Link href="/flight" className="text-xs text-sky-400 underline">
-            {locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
+          <Link href={source === "bluetooth" ? "/profile" : "/flight"} className="text-xs text-sky-400 underline">
+            {source === "bluetooth"
+              ? locale === "zh-CN" ? "选择个人画像" : "Select Ear Profile"
+              : locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
           </Link>
         </div>
       </div>

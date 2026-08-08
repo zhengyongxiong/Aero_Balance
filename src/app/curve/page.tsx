@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Target, Waveform, ChartLineUp } from "@phosphor-icons/react";
+import { ArrowLeft } from "@phosphor-icons/react/ArrowLeft";
+import { ChartLineUp } from "@phosphor-icons/react/ChartLineUp";
+import { Target } from "@phosphor-icons/react/Target";
+import { Waveform } from "@phosphor-icons/react/Waveform";
 import {
   LineChart,
   Line,
@@ -30,17 +33,26 @@ export default function CurvePage() {
   const locale = useAppStore((s) => s.locale);
   const targetCurves = useAppStore((s) => s.targetCurves);
   const strategy = useAppStore((s) => s.strategy);
+  const source = useAppStore((s) => s.source);
 
   if (!targetCurves || targetCurves.length === 0) {
     return (
       <div className="page-container">
         <div className="flex flex-col items-center gap-4 py-20 text-slate-500">
           <Target size={48} weight="thin" />
-          <p className="text-sm">
-            {locale === "zh-CN" ? "暂无曲线数据，请先启动飞行模拟" : "No curve data. Start the flight simulator first."}
+          <p className="text-center text-sm">
+            {source === "bluetooth"
+              ? locale === "zh-CN"
+                ? "实时气压已接入。完成个人画像后即可生成双耳目标曲线。"
+                : "Live pressure is available. Complete the ear profile to generate target curves."
+              : locale === "zh-CN"
+                ? "暂无曲线数据，请先启动飞行模拟"
+                : "No curve data. Start the flight simulator first."}
           </p>
-          <Link href="/flight" className="text-xs text-sky-400 underline">
-            {locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
+          <Link href={source === "bluetooth" ? "/profile" : "/flight"} className="text-xs text-sky-400 underline">
+            {source === "bluetooth"
+              ? locale === "zh-CN" ? "选择个人画像" : "Select Ear Profile"
+              : locale === "zh-CN" ? "前往飞行模拟器" : "Open Flight Simulator"}
           </Link>
         </div>
       </div>

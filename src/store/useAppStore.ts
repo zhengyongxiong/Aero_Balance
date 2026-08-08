@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { calculateEarProfile } from "@/lib/profile";
+import { inferLiveFlightPhase } from "@/lib/live-flight";
 import { predictPressure } from "@/lib/prediction";
 import { composeAnalysisResult } from "@/lib/result";
 import {
@@ -29,6 +30,7 @@ export type DeviceConnectionState =
   | "unsupported"
   | "disconnected"
   | "scanning"
+  | "reconnecting"
   | "connected"
   | "failed";
 
@@ -45,6 +47,7 @@ interface AppState {
   isPlaying: boolean;
   playbackSpeed: 1 | 4;
   activeSessionId: string | null;
+  liveBaselinePressure: number | null;
   pressureHistory: PressureSample[];
   prediction: PredictionResult | null;
   strategy: BilateralStrategy | null;
@@ -61,6 +64,7 @@ interface AppState {
   ): void;
   loadSeedProfile(profile: SeedProfile): void;
   setProfile(input: EarProfileInput): void;
+  beginLiveSession(sessionId: string): void;
   appendPressureSample(sample: PressureSample): void;
   replacePressureHistory(samples: PressureSample[]): void;
   restoreSession(): Promise<void>;
@@ -71,18 +75,12 @@ const derive = (
   profileInput: EarProfileInput | null,
   pressureHistory: PressureSample[],
 ) => {
-  if (!profileInput) {
-    return {
-      profileResult: null,
-      prediction: null,
-      strategy: null,
-      targetCurves: [],
-      analysis: null,
-    };
-  }
-
-  const profileResult = calculateEarProfile(profileInput);
-  if (pressureHistory.length < 3) {
+  const latest = pressureHistory.at(-1);
+  const activeSamples = latest
+    ? pressureHistory.filter((sample) => sample.sessionId === latest.sessionId)
+    : [];
+  const profileResult = profileInput ? calculateEarProfile(profileInput) : null;
+  if (activeSamples.length < 3) {
     return {
       profileResult,
       prediction: null,
@@ -92,27 +90,37 @@ const derive = (
     };
   }
 
-  const prediction = predictPressure(pressureHistory);
-  const phase = pressureHistory.at(-1)?.phase ?? "demo";
+  const prediction = predictPressure(activeSamples);
+  if (!profileResult) {
+    return {
+      profileResult: null,
+      prediction,
+      strategy: null,
+      targetCurves: [],
+      analysis: null,
+    };
+  }
+
+  const phase = activeSamples.at(-1)?.phase ?? "demo";
   const strategy = createBilateralStrategy(
     profileResult,
     prediction.stressIndex,
     phase,
     prediction.trend,
   );
-  const latest = pressureHistory.at(-1)!;
+  const latestSample = activeSamples.at(-1)!;
   const forecastSamples: PressureSample[] = prediction.points
     .filter((point) => point.kind === "forecast")
     .map((point) => ({
       id: `forecast-${point.timestamp}`,
-      sessionId: latest.sessionId,
+      sessionId: latestSample.sessionId,
       pressure: point.pressure,
       phase,
       timestamp: point.timestamp,
-      source: latest.source,
+      source: latestSample.source,
     }));
   const targetCurves = createTargetCurves(
-    [...pressureHistory, ...forecastSamples],
+    [...activeSamples, ...forecastSamples],
     strategy.left.smoothingFactor,
     strategy.right.smoothingFactor,
   );
@@ -140,6 +148,7 @@ const initial = {
   isPlaying: false,
   playbackSpeed: 1 as 1 | 4,
   activeSessionId: null,
+  liveBaselinePressure: null,
   pressureHistory: [],
   prediction: null,
   strategy: null,
@@ -169,28 +178,68 @@ export const useAppStore = create<AppState>()(
           selectedSeedId: null,
           ...derive(profileInput, state.pressureHistory),
         })),
+      beginLiveSession: (sessionId) => {
+        const startedAt = Date.now();
+        void savePressureSession({
+          id: sessionId,
+          startedAt,
+          source: "bluetooth",
+        }).catch(() => undefined);
+        set({
+          activeSessionId: sessionId,
+          source: "bluetooth",
+          phase: "landing",
+          isPlaying: false,
+          pressureHistory: [],
+          liveBaselinePressure: null,
+          prediction: null,
+          strategy: null,
+          targetCurves: [],
+          analysis: null,
+        });
+      },
       appendPressureSample: (sample) =>
         set((state) => {
+          const isNewSession = state.activeSessionId !== sample.sessionId;
+          const currentHistory = isNewSession ? [] : state.pressureHistory;
           if (
-            state.pressureHistory.some(
+            currentHistory.some(
               (item) =>
-                item.sessionId === sample.sessionId &&
-                item.timestamp === sample.timestamp,
+                item.id === sample.id ||
+                (sample.sequence !== undefined &&
+                  item.sequence === sample.sequence &&
+                  item.deviceTimestamp === sample.deviceTimestamp),
             )
           ) {
             return state;
           }
+          const liveBaselinePressure =
+            sample.source === "bluetooth"
+              ? isNewSession || state.liveBaselinePressure === null
+                ? sample.pressure
+                : state.liveBaselinePressure
+              : null;
+          const phase =
+            sample.source === "bluetooth" && sample.devicePhase === "sensor"
+              ? inferLiveFlightPhase(
+                  [...currentHistory, sample],
+                  liveBaselinePressure ?? sample.pressure,
+                  isNewSession ? "landing" : state.phase,
+                )
+              : sample.phase;
+          const normalizedSample = { ...sample, phase };
           const pressureHistory = [
-            ...state.pressureHistory,
-            sample,
+            ...currentHistory,
+            normalizedSample,
           ].slice(-360);
-          void savePressureSample(sample).catch(() => undefined);
+          void savePressureSample(normalizedSample).catch(() => undefined);
 
           return {
             pressureHistory,
             activeSessionId: sample.sessionId,
             source: sample.source,
-            phase: sample.phase,
+            phase,
+            liveBaselinePressure,
             ...derive(state.profileInput, pressureHistory),
           };
         }),
@@ -221,6 +270,10 @@ export const useAppStore = create<AppState>()(
             activeSessionId: latest?.sessionId ?? null,
             source: latest?.source ?? null,
             phase: latest?.phase ?? state.phase,
+            liveBaselinePressure:
+              latest?.source === "bluetooth"
+                ? pressureHistory[0]?.pressure ?? null
+                : null,
             ...derive(state.profileInput, pressureHistory),
           };
         }),
@@ -244,6 +297,10 @@ export const useAppStore = create<AppState>()(
               pressureHistory,
               source: latest.source,
               phase: latest.phase,
+              liveBaselinePressure:
+                latest.source === "bluetooth"
+                  ? pressureHistory[0]?.pressure ?? null
+                  : null,
               ...derive(current.profileInput, pressureHistory),
             };
           });
@@ -267,6 +324,8 @@ export const useAppStore = create<AppState>()(
         profileInput: state.profileInput,
         selectedSeedId: state.selectedSeedId,
         activeSessionId: state.activeSessionId,
+        source: state.source,
+        phase: state.phase,
       }),
     },
   ),

@@ -1,10 +1,8 @@
 import Image from "next/image";
-import {
-  AirplaneTilt,
-  Gauge,
-  HeartStraight,
-  ShieldWarning,
-} from "@phosphor-icons/react";
+import { AirplaneTilt } from "@phosphor-icons/react/AirplaneTilt";
+import { Gauge } from "@phosphor-icons/react/Gauge";
+import { HeartStraight } from "@phosphor-icons/react/HeartStraight";
+import { ShieldWarning } from "@phosphor-icons/react/ShieldWarning";
 import type { FlightPhase, Locale, RiskLevel } from "@/types/domain";
 import { translate } from "@/i18n/messages";
 
@@ -16,25 +14,32 @@ export function PressureSphere({
   locale,
 }: {
   pressure: number;
-  comfort: number;
-  risk: RiskLevel;
+  comfort: number | null;
+  risk: RiskLevel | null;
   phase: FlightPhase;
   locale: Locale;
 }) {
   const phaseKey = `phase.${phase}` as const;
-  const riskKey = `risk.${risk}` as const;
+  const unavailable = locale === "zh-CN" ? "需画像" : "Profile needed";
   const metrics = [
     {
       label: translate(locale, "metric.comfort"),
-      value: String(comfort),
+      value: comfort === null ? "--" : String(comfort),
       icon: HeartStraight,
       tone: "blue",
     },
     {
       label: translate(locale, "metric.risk"),
-      value: translate(locale, riskKey),
+      value: risk === null ? unavailable : translate(locale, `risk.${risk}`),
       icon: ShieldWarning,
-      tone: risk === "high" ? "red" : risk === "medium" ? "amber" : "green",
+      tone:
+        risk === "high"
+          ? "red"
+          : risk === "medium"
+            ? "amber"
+            : risk === "low"
+              ? "green"
+              : "blue",
     },
     {
       label: translate(locale, "metric.phase"),

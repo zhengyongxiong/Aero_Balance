@@ -14,9 +14,21 @@ export interface PressureSample {
   id: string;
   sessionId: string;
   pressure: number;
+  pressurePa?: number;
   temperature?: number;
+  altitude?: number;
   battery?: number;
   phase: FlightPhase;
+  devicePhase?: "sensor";
+  sensorSource?: "bmp390";
+  i2cAddress?: "0x76" | "0x77";
+  sequence?: number;
+  sampleCount?: number;
+  valveLeftOpen?: boolean;
+  valveRightOpen?: boolean;
+  firmwareFaultCode?: number;
+  rawPayload?: string;
+  deviceTimestamp?: number;
   timestamp: number;
   source: DataSource;
 }
